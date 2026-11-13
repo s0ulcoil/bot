@@ -27,7 +27,7 @@ body{padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inse
 
 main{position:relative;z-index:1;max-width:480px;margin:0 auto}
 
-/* Герой: значок в левом верхнем углу, заголовок по центру */
+/* Герой: значок рядом с заголовком */
 .hero{position:relative;text-align:center;padding:30px 0 8px}
 .brand{display:flex;align-items:center;justify-content:center;gap:28px}
 .orb{position:relative;flex:none;width:84px;height:84px}
@@ -76,6 +76,10 @@ h1{font-family:Unbounded,sans-serif;font-weight:700;font-size:26px;margin:0;lett
 .btn .rip{position:absolute;border-radius:50%;background:rgba(120,120,120,.5);transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none}
 @keyframes rip{to{transform:scale(4);opacity:0}}
 .note{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.09)}
+
+[hidden]{display:none!important}
+.gate{text-align:center;margin-top:26px;padding:22px 18px}
+.gate h3{font-size:18px;margin-bottom:6px}
 
 /* Донатеры */
 .total{text-align:center;padding:22px 16px;overflow:hidden}
@@ -136,6 +140,15 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
     <div class="hello" id="hello"></div>
   </section>
 
+  <div id="gate" class="card gate">
+    <h3 id="gateTitle">Проверяем подписку</h3>
+    <p id="gateText">Секунду...</p>
+    <button class="btn main" id="gateSub" data-tg="https://t.me/hiddenwikipedia" hidden>Подписаться на канал</button>
+    <button class="btn ghost" id="gateCheck" hidden>Я подписался</button>
+    <button class="btn main" id="gateBot" hidden>Открыть бота</button>
+  </div>
+
+  <div id="app" hidden>
   <nav class="tabs">
     <div class="pill" id="pill"></div>
     <button class="on" data-tab="subs">Подписки</button>
@@ -148,12 +161,12 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
     <div class="card">
       <h3>Авто подписка</h3>
       <p>Подключение к серверам автоматически. Обновляется сама.</p>
-      <button class="btn main" data-copy="https://raw.githubusercontent.com/s0ulcoil/HavenVPN/refs/heads/main/HavenAuto">Скопировать ссылку</button>
+      <button class="btn main" data-copy="auto">Скопировать ссылку</button>
     </div>
     <div class="card">
       <h3>Ручная ссылка</h3>
       <p>Подключение к серверам вручную.</p>
-      <button class="btn alt" data-copy="https://raw.githubusercontent.com/s0ulcoil/HavenVPN/refs/heads/main/Haven">Скопировать ссылку</button>
+      <button class="btn alt" data-copy="manual">Скопировать ссылку</button>
     </div>
     <div class="card note">
       <h3>Рекомендуем INCY</h3>
@@ -179,6 +192,7 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
     <details><summary>Не работает подключение</summary><div>Обнови подписку в приложении и выбери другой сервер. Новости и объявления мы публикуем в канале.</div></details>
     <button class="btn ghost" data-tg="https://t.me/hiddenwikipedia">Открыть наш канал</button>
   </section>
+</div>
 </main>
 
 <div class="toast" id="toast"></div>
@@ -266,10 +280,55 @@ document.addEventListener("click", e => {
   rip.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s/2}px;top:${e.clientY - r.top - s/2}px`;
   btn.appendChild(rip); setTimeout(() => rip.remove(), 650);
 
-  if (btn.dataset.copy) { copyText(btn.dataset.copy).then(() => { toast("Ссылка скопирована"); buzz("medium"); }); }
+  if (btn.dataset.copy) { const link = LINKS[btn.dataset.copy]; if (link) copyText(link).then(() => { toast("Ссылка скопирована"); buzz("medium"); }); }
   else if (btn.dataset.link) { tg ? tg.openLink(btn.dataset.link) : window.open(btn.dataset.link, "_blank"); }
   else if (btn.dataset.tg) { tg ? tg.openTelegramLink(btn.dataset.tg) : window.open(btn.dataset.tg, "_blank"); }
 });
+
+// ====== ПРОВЕРКА ПОДПИСКИ НА КАНАЛ ======
+const API_URL = "https://havenvpn.havenvpnsupport.workers.dev/api/check";
+// Ссылка на бота, например "https://t.me/haven_vpn_bot". Пока пусто, кнопка «Открыть бота» не показывается
+const BOT_URL = "";
+const LINKS = {};
+const gate = document.getElementById("gate"), appEl = document.getElementById("app");
+const gSub = document.getElementById("gateSub"), gCheck = document.getElementById("gateCheck"), gBot = document.getElementById("gateBot");
+
+function showGate(title, text, o = {}) {
+  appEl.hidden = true; gate.hidden = false;
+  document.getElementById("gateTitle").textContent = title;
+  document.getElementById("gateText").textContent = text;
+  gSub.hidden = !o.sub; gCheck.hidden = !o.check; gBot.hidden = !(o.bot && BOT_URL);
+}
+function unlock() {
+  gate.hidden = true; appEl.hidden = false;
+  openTab("subs");
+}
+async function checkAccess(manual) {
+  if (!tg?.initData) {
+    showGate("Открой через Telegram", "Приложение работает только внутри бота Haven VPN. Нажми кнопку ниже и запусти бота.", { bot: true });
+    return;
+  }
+  showGate("Проверяем подписку", "Секунду...");
+  try {
+    const r = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tg.initData }),
+    });
+    const d = await r.json();
+    if (d.ok && d.subscribed) { LINKS.auto = d.auto; LINKS.manual = d.manual; unlock(); }
+    else if (d.ok) showGate("Нужна подписка на канал",
+      manual ? "Подписка не найдена. Подпишись на канал и нажми «Я подписался»."
+             : "Чтобы пользоваться приложением, подпишись на наш канал, а затем нажми «Я подписался».",
+      { sub: true, check: true });
+    else showGate("Не удалось проверить подписку", "Попробуй ещё раз чуть позже.", { check: true });
+  } catch (e) {
+    showGate("Нет связи", "Проверь интернет и попробуй снова.", { check: true });
+  }
+}
+gCheck.addEventListener("click", () => checkAccess(true));
+gBot.addEventListener("click", () => window.open(BOT_URL, "_blank"));
+checkAccess(false);
 
 // Плавающие частицы
 (function(){
