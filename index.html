@@ -18,6 +18,7 @@
 html,body{margin:0;background:var(--bg);color:var(--white);font-family:Manrope,system-ui,sans-serif;min-height:100%;transition:background .35s}
 body{padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom));overflow-x:hidden}
 
+/* Фон */
 .glow{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .glow i{position:absolute;width:60vmax;height:60vmax;border-radius:50%;filter:blur(80px);background:var(--accent);opacity:.09;animation:drift 20s ease-in-out infinite alternate;transition:background .35s}
 .glow i:nth-child(1){top:-25vmax;left:-20vmax}
@@ -27,7 +28,15 @@ body{padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inse
 
 main{position:relative;z-index:1;max-width:480px;margin:0 auto}
 
-.hero{position:relative;text-align:center;padding:30px 0 8px}
+/* Верхняя панель с кнопкой профиля */
+.top-bar{display:flex;justify-content:flex-end;margin-bottom:10px;position:relative;z-index:2}
+.avatar-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:linear-gradient(135deg,#fff,var(--accent2));
+  display:grid;place-items:center;font:700 18px Unbounded,sans-serif;color:#000;cursor:pointer;transition:transform .15s, box-shadow .3s}
+.avatar-btn:active{transform:scale(.92)}
+.avatar-btn:hover{box-shadow:0 0 15px var(--accent)}
+
+/* Герой */
+.hero{position:relative;text-align:center;padding:10px 0 8px}
 .brand{display:flex;align-items:center;justify-content:center;gap:28px}
 .orb{position:relative;flex:none;width:84px;height:84px}
 .ring{position:absolute;inset:0;border-radius:50%;border:1.3px solid rgba(255,255,255,.22);background:radial-gradient(circle,rgba(255,255,255,.07),transparent 70%)}
@@ -50,6 +59,7 @@ h1{font-family:Unbounded,sans-serif;font-weight:700;font-size:26px;margin:0;lett
 .hero p{margin:30px auto 0;max-width:300px;color:var(--g2);font-size:14.5px;line-height:1.5}
 .hello{margin:10px 0 0;font-size:13px;color:var(--g1);font-weight:600}
 
+/* Вкладки — теперь 3 колонки */
 .tabs{position:relative;display:grid;grid-template-columns:repeat(3,1fr);margin:24px 0 16px;padding:4px;border-radius:16px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px)}
 .tabs button{position:relative;z-index:1;border:0;background:none;color:var(--g2);font:600 13.5px Manrope,sans-serif;padding:11px 4px;cursor:pointer;transition:color .25s}
 .tabs button.on{color:#000}
@@ -61,6 +71,7 @@ h1{font-family:Unbounded,sans-serif;font-weight:700;font-size:26px;margin:0;lett
 .panel.on{display:block;animation:pop .45s cubic-bezier(.2,1,.3,1)}
 @keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}}
 
+/* Карточки */
 .card{position:relative;margin-bottom:12px;padding:16px;border-radius:20px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px)}
 .card h3{margin:0 0 4px;font:700 16px Manrope,sans-serif}
 .card p{margin:0;color:var(--g2);font-size:13.5px;line-height:1.5}
@@ -76,6 +87,7 @@ h1{font-family:Unbounded,sans-serif;font-weight:700;font-size:26px;margin:0;lett
 .gate{text-align:center;margin-top:26px;padding:22px 18px}
 .gate h3{font-size:18px;margin-bottom:6px}
 
+/* Донатеры */
 .total{text-align:center;padding:22px 16px;overflow:hidden}
 .total::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.12) 50%,transparent 65%);transform:translateX(-100%);animation:shine 4.5s ease-in-out infinite}
 @keyframes shine{60%,100%{transform:translateX(100%)}}
@@ -92,26 +104,32 @@ h1{font-family:Unbounded,sans-serif;font-weight:700;font-size:26px;margin:0;lett
 .am{font-weight:700;color:#fff;font-size:14px}
 .thanks{text-align:center;color:var(--g2);font-size:13px;margin:4px 0 14px}
 
-.profile{text-align:center;padding:26px 18px}
-.avatar{width:86px;height:86px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;
-  font:700 34px Unbounded,sans-serif;color:#000;background:linear-gradient(135deg,#fff,var(--accent2));
+/* Модальное окно профиля */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal{width:100%;max-width:340px;background:#111;border:1px solid var(--line);border-radius:24px;padding:24px;transform:translateY(20px) scale(.95);transition:transform .3s cubic-bezier(.2,1,.3,1);box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.modal-overlay.show .modal{transform:translateY(0) scale(1)}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(255,255,255,.1);color:#fff;font-size:16px;cursor:pointer;display:grid;place-items:center;transition:background .2s}
+.modal-close:hover{background:rgba(255,255,255,.2)}
+.modal-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;
+  font:700 32px Unbounded,sans-serif;color:#000;background:linear-gradient(135deg,#fff,var(--accent2));
   box-shadow:0 0 40px -8px var(--accent);transition:background .35s}
-.pname{font:700 20px Unbounded,sans-serif;margin:0 0 4px}
-.puser{color:var(--g2);font-size:14px;margin:0 0 16px}
-.pinfo{display:flex;justify-content:space-around;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
-.pinfo div{text-align:center}
-.pinfo small{display:block;color:var(--g2);font-size:12px;margin-bottom:4px}
-.pinfo b{font:700 15px Manrope,sans-serif}
+.modal-name{font:700 20px Unbounded,sans-serif;margin:0 0 4px;text-align:center}
+.modal-user{color:var(--g2);font-size:14px;margin:0 0 20px;text-align:center}
+.modal-info{display:flex;justify-content:space-around;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.modal-info div{text-align:center}
+.modal-info small{display:block;color:var(--g2);font-size:12px;margin-bottom:4px}
+.modal-info b{font:700 15px Manrope,sans-serif}
 
-.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
-.swatch{position:relative;border:0;padding:0;cursor:pointer;border-radius:16px;overflow:hidden;
-  height:60px;background:var(--glass);border:1px solid var(--line);transition:transform .15s}
+/* Темы в модалке */
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.swatch{position:relative;border:0;padding:0;cursor:pointer;border-radius:12px;overflow:hidden;
+  height:44px;background:var(--glass);border:1px solid var(--line);transition:transform .15s}
 .swatch:active{transform:scale(.95)}
 .swatch i{position:absolute;inset:0;background:var(--c)}
-.swatch span{position:absolute;left:0;right:0;bottom:0;padding:5px 0;font:600 11px Manrope,sans-serif;color:#000;
-  background:rgba(255,255,255,.85);text-align:center}
 .swatch.sel{outline:2px solid #fff;outline-offset:2px}
 
+/* Помощь */
 details{border-radius:16px;background:var(--glass);border:1px solid var(--line);margin-bottom:10px;overflow:hidden}
 summary{list-style:none;cursor:pointer;padding:15px 16px;font-weight:700;font-size:14.5px;display:flex;justify-content:space-between;align-items:center}
 summary::-webkit-details-marker{display:none}
@@ -119,7 +137,8 @@ summary::after{content:"+";font-size:22px;color:var(--g1);transition:transform .
 details[open] summary::after{transform:rotate(135deg)}
 details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.55;animation:pop .35s ease}
 
-.toast{position:fixed;left:50%;bottom:max(26px,env(safe-area-inset-bottom));z-index:9;padding:12px 20px;border-radius:30px;
+/* Тост */
+.toast{position:fixed;left:50%;bottom:max(26px,env(safe-area-inset-bottom));z-index:200;padding:12px 20px;border-radius:30px;
   background:rgba(18,18,18,.95);border:1px solid var(--accent);color:#fff;font-weight:700;font-size:14px;
   transform:translate(-50%,120px);opacity:0;transition:transform .45s cubic-bezier(.3,1.5,.5,1),opacity .3s;white-space:nowrap;box-shadow:0 10px 40px rgba(255,255,255,.12)}
 .toast.show{transform:translate(-50%,0);opacity:1}
@@ -131,6 +150,11 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
 <canvas id="sparks"></canvas>
 
 <main>
+  <!-- Верхняя панель с кнопкой профиля -->
+  <div class="top-bar">
+    <button class="avatar-btn" id="openProfile">?</button>
+  </div>
+
   <section class="hero">
     <div class="brand">
     <div class="orb">
@@ -151,6 +175,7 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
     <div class="hello" id="hello"></div>
   </section>
 
+  <!-- Экран проверки -->
   <div id="gate" class="card gate">
     <h3 id="gateTitle">Проверяем подписку</h3>
     <p id="gateText">Секунду...</p>
@@ -159,15 +184,35 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
     <button class="btn main" id="gateBot" hidden>Открыть бота</button>
   </div>
 
+  <!-- Само приложение -->
   <div id="app" hidden>
   <nav class="tabs">
     <div class="pill" id="pill"></div>
-    <button class="on" data-tab="donors">Донатеры</button>
-    <button data-tab="profile">Профиль</button>
+    <button class="on" data-tab="subs">Подписки</button>
+    <button data-tab="donors">Донатеры</button>
     <button data-tab="help">Помощь</button>
   </nav>
 
-  <section class="panel on" id="donors">
+  <!-- Подписки -->
+  <section class="panel on" id="subs">
+    <div class="card">
+      <h3>Авто подписка</h3>
+      <p>Подключение к серверам автоматически. Обновляется сама.</p>
+      <button class="btn main" data-copy="auto">Скопировать ссылку</button>
+    </div>
+    <div class="card">
+      <h3>Ручная ссылка</h3>
+      <p>Подключение к серверам вручную.</p>
+      <button class="btn main" data-copy="manual">Скопировать ссылку</button>
+    </div>
+    <div class="card note">
+      <h3>Рекомендуем INCY</h3>
+      <p>Для авто подписки используйте приложение INCY. В целом оно лучше всего подходит для наших подписок.</p>
+    </div>
+  </section>
+
+  <!-- Донатеры -->
+  <section class="panel" id="donors">
     <div class="card total">
       <small>Всего собрано</small>
       <strong id="total">0 ₽</strong>
@@ -177,33 +222,34 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
     <button class="btn main" data-link="https://pay.cloudtips.ru/p/5d840674">Поддержать проект</button>
   </section>
 
-  <section class="panel" id="profile">
-    <div class="card profile">
-      <div class="avatar" id="avatar">?</div>
-      <h2 class="pname" id="pname">Гость</h2>
-      <p class="puser" id="puser">@username</p>
-      <div class="pinfo">
-        <div><small>ID</small><b id="pid">—</b></div>
-        <div><small>Язык</small><b id="plang">—</b></div>
-        <div><small>Premium</small><b id="pprem">—</b></div>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Тема оформления</h3>
-      <p>Цвет акцента и подсветки</p>
-      <div class="themes" id="themes"></div>
-    </div>
-    <button class="btn main" data-tg="https://t.me/hiddenwikipedia">Открыть наш канал</button>
-  </section>
-
+  <!-- Помощь -->
   <section class="panel" id="help">
-    <details><summary>Как подключиться?</summary><div>Открой приложение INCY и вставь ссылку подписки как новую. После обновления выбери сервер и подключись.</div></details>
+    <details><summary>Как подключиться?</summary><div>Нажми «Скопировать ссылку» во вкладке «Подписки», открой приложение INCY и вставь ссылку как новую подписку. После обновления выбери сервер и подключись.</div></details>
     <details><summary>Чем отличаются ссылки?</summary><div>Авто подписка подключает к серверам автоматически и обновляется сама. Ручная ссылка нужна, если хочешь выбирать серверы вручную.</div></details>
     <details><summary>Не работает подключение</summary><div>Обнови подписку в приложении и выбери другой сервер. Новости и объявления мы публикуем в канале.</div></details>
     <button class="btn main" data-tg="https://t.me/hiddenwikipedia">Открыть наш канал</button>
   </section>
 </div>
 </main>
+
+<!-- Модальное окно профиля -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal">
+    <button class="modal-close" id="closeProfile">✕</button>
+    <div class="modal-avatar" id="pavatar">?</div>
+    <h2 class="modal-name" id="pname">Гость</h2>
+    <p class="modal-user" id="puser">@username</p>
+    
+    <div class="modal-info">
+      <div><small>ID</small><b id="pid">—</b></div>
+      <div><small>Язык</small><b id="plang">—</b></div>
+      <div><small>Premium</small><b id="pprem">—</b></div>
+    </div>
+
+    <h3 style="margin: 0 0 12px; font-size: 14px;">Тема оформления</h3>
+    <div class="themes" id="themes"></div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -212,6 +258,7 @@ const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); try{ tg.setHeaderColor("#080808"); tg.setBackgroundColor("#080808"); }catch(e){} }
 const buzz = t => { try{ tg?.HapticFeedback?.impactOccurred(t||"light"); }catch(e){} };
 
+// ====== ТЕМЫ ======
 const THEMES = [
   { id: "white",  name: "Белая",     accent: "#ffffff", accent2: "#c8c8c8" },
   { id: "red",    name: "Красная",   accent: "#ff5a5a", accent2: "#b83333" },
@@ -225,7 +272,6 @@ const themesEl = document.getElementById("themes");
 themesEl.innerHTML = THEMES.map(t => `
   <button class="swatch" data-theme="${t.id}" title="${t.name}">
     <i style="--c:linear-gradient(135deg,${t.accent},${t.accent2})"></i>
-    <span>${t.name}</span>
   </button>
 `).join("");
 
@@ -241,22 +287,41 @@ themesEl.addEventListener("click", e => {
   if (!b) return;
   applyTheme(b.dataset.theme);
   buzz("medium");
-  toast("Тема: " + (THEMES.find(t => t.id === b.dataset.theme)?.name || ""));
 });
 
 try { applyTheme(localStorage.getItem("theme") || "white"); } catch(e){ applyTheme("white"); }
 
+// ====== ПРОФИЛЬ ======
 const u = tg?.initDataUnsafe?.user;
 if (u) {
   if (u.first_name) document.getElementById("hello").textContent = "Привет, " + u.first_name;
-  document.getElementById("pname").textContent = [u.first_name, u.last_name].filter(Boolean).join(" ") || "Гость";
+  const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ") || "Гость";
+  const initial = (u.first_name?.[0] || "?").toUpperCase();
+  
+  document.getElementById("pname").textContent = fullName;
   document.getElementById("puser").textContent = u.username ? "@" + u.username : "без username";
   document.getElementById("pid").textContent = u.id || "—";
   document.getElementById("plang").textContent = (u.language_code || "—").toUpperCase();
   document.getElementById("pprem").textContent = u.is_premium ? "Да" : "Нет";
-  document.getElementById("avatar").textContent = (u.first_name?.[0] || "?").toUpperCase();
+  
+  document.getElementById("pavatar").textContent = initial;
+  document.getElementById("openProfile").textContent = initial;
 }
 
+// Открытие/закрытие профиля
+const modal = document.getElementById("profileModal");
+document.getElementById("openProfile").addEventListener("click", () => {
+  modal.classList.add("show");
+  buzz("light");
+});
+document.getElementById("closeProfile").addEventListener("click", () => {
+  modal.classList.remove("show");
+});
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) modal.classList.remove("show");
+});
+
+// ====== ДОНАТЕРЫ ======
 const DONORS = [
   { name: "labi-le", amount: 500 },
   { name: "de hoh", amount: 50 },
@@ -290,6 +355,7 @@ function countUp(){
   })(t0);
 }
 
+// ====== ВКЛАДКИ ======
 const tabs = [...document.querySelectorAll(".tabs button")];
 const pill = document.getElementById("pill");
 function openTab(id){
@@ -303,6 +369,7 @@ function openTab(id){
 }
 tabs.forEach(b => b.onclick = () => openTab(b.dataset.tab));
 
+// ====== ТОСТ ======
 let tt;
 function toast(msg){
   const t = document.getElementById("toast");
@@ -310,6 +377,16 @@ function toast(msg){
   clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 1800);
 }
 
+// ====== КОПИРОВАНИЕ ======
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); }
+  catch(e){
+    const a = document.createElement("textarea"); a.value = text; document.body.appendChild(a); a.select();
+    document.execCommand("copy"); a.remove();
+  }
+}
+
+// ====== КЛИКИ ======
 document.addEventListener("click", e => {
   const btn = e.target.closest(".btn");
   if (!btn) return;
@@ -318,13 +395,16 @@ document.addEventListener("click", e => {
   rip.className = "rip";
   rip.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s/2}px;top:${e.clientY - r.top - s/2}px`;
   btn.appendChild(rip); setTimeout(() => rip.remove(), 650);
-  if (btn.dataset.link) { tg ? tg.openLink(btn.dataset.link) : window.open(btn.dataset.link, "_blank"); }
+
+  if (btn.dataset.copy) { const link = LINKS[btn.dataset.copy]; if (link) copyText(link).then(() => { toast("Ссылка скопирована"); buzz("medium"); }); }
+  else if (btn.dataset.link) { tg ? tg.openLink(btn.dataset.link) : window.open(btn.dataset.link, "_blank"); }
   else if (btn.dataset.tg) { tg ? tg.openTelegramLink(btn.dataset.tg) : window.open(btn.dataset.tg, "_blank"); }
 });
 
 // ====== ПРОВЕРКА ПОДПИСКИ ======
 const API_URL = "https://havenvpn.havenvpnsupport.workers.dev/api/check"; 
-const BOT_URL = "https://t.me/HavenVPNrobot"; // Твой бот
+const BOT_URL = "https://t.me/HavenVPNrobot";
+const LINKS = {};
 const gate = document.getElementById("gate"), appEl = document.getElementById("app");
 const gSub = document.getElementById("gateSub"), gCheck = document.getElementById("gateCheck"), gBot = document.getElementById("gateBot");
 
@@ -339,7 +419,7 @@ function showGate(title, text, o = {}) {
 
 function unlock() {
   gate.hidden = true; appEl.hidden = false;
-  openTab("donors");
+  openTab("subs");
 }
 
 async function checkAccess(manual) {
@@ -361,6 +441,8 @@ async function checkAccess(manual) {
     const d = await r.json();
 
     if (d.ok && d.subscribed) {
+      LINKS.auto = d.auto;
+      LINKS.manual = d.manual;
       unlock();
     } else if (d.ok && !d.subscribed) {
       showGate("Нужна подписка на канал",
@@ -371,7 +453,6 @@ async function checkAccess(manual) {
       showGate("Ошибка проверки", "Не удалось проверить подписку. Попробуй позже.", { sub: true, check: true });
     }
   } catch (e) {
-    // Даже если нет связи — даем кнопки
     showGate("Нет связи с сервером", 
       "Проверь интернет. Если ты еще не подписан — подпишись на канал и нажми «Я подписался».", 
       { sub: true, check: true });
@@ -382,6 +463,7 @@ gCheck.addEventListener("click", () => checkAccess(true));
 gBot.addEventListener("click", () => window.open(BOT_URL, "_blank"));
 checkAccess(false);
 
+// ====== ЧАСТИЦЫ ======
 (function(){
   const c = document.getElementById("sparks"), x = c.getContext("2d");
   if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
