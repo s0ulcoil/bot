@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Haven VPN</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808; --white:#f5f5f5; --g1:#d0d0d0; --g2:#8a8a8a; --g3:#3a3a3a;
+  --glass:rgba(255,255,255,.055); --line:rgba(255,255,255,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--white);font-family:Manrope,system-ui,sans-serif;min-height:100%}
+body{padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom));overflow-x:hidden}
+
+/* Фон: мягкое серое свечение + частицы */
+.glow{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.glow i{position:absolute;width:60vmax;height:60vmax;border-radius:50%;filter:blur(80px);background:#fff;opacity:.09;animation:drift 20s ease-in-out infinite alternate}
+.glow i:nth-child(1){top:-25vmax;left:-20vmax}
+.glow i:nth-child(2){bottom:-30vmax;right:-25vmax;animation-duration:26s;opacity:.07}
+@keyframes drift{to{transform:translate(10vmax,7vmax) scale(1.2)}}
+#sparks{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+main{position:relative;z-index:1;max-width:480px;margin:0 auto}
+
+/* Герой: значок в левом верхнем углу, заголовок по центру */
+.hero{position:relative;text-align:center;padding:30px 0 8px}
+.brand{display:flex;align-items:center;justify-content:center;gap:28px}
+.orb{position:relative;flex:none;width:84px;height:84px}
+.ring{position:absolute;inset:0;border-radius:50%;border:1.3px solid rgba(255,255,255,.22);background:radial-gradient(circle,rgba(255,255,255,.07),transparent 70%)}
+.pulse{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,255,255,.35);animation:pulse 3.6s ease-out infinite}
+.pulse.b{animation-delay:1.8s}
+@keyframes pulse{from{transform:scale(1);opacity:.7}to{transform:scale(1.6);opacity:0}}
+.shield{position:absolute;inset:0;width:100%;height:100%;padding:17px;filter:drop-shadow(0 0 12px rgba(255,255,255,.3))}
+.orbit{position:absolute;border-radius:50%;animation:spin linear infinite}
+.orbit b{position:absolute;border-radius:50%;background:#fff}
+.o1{inset:-5px;animation-duration:7s}
+.o1 b{top:-4px;left:calc(50% - 4px);width:8px;height:8px;box-shadow:0 0 10px 2px rgba(255,255,255,.9)}
+.o2{inset:-14px;animation-duration:12s;animation-direction:reverse}
+.o2 b{top:calc(50% - 3.5px);left:-3.5px;width:7px;height:7px;background:var(--g2);box-shadow:0 0 6px rgba(255,255,255,.4)}
+.o3{inset:-23px;animation-duration:19s}
+.o3 b{bottom:-3px;left:calc(50% - 3px);width:6px;height:6px;background:var(--g1);opacity:.8}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+h1{font-family:Unbounded,sans-serif;font-weight:700;font-size:26px;margin:0;letter-spacing:-.01em;
+  background:linear-gradient(180deg,#fff,#9a9a9a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:30px auto 0;max-width:300px;color:var(--g2);font-size:14.5px;line-height:1.5}
+.hello{margin:10px 0 0;font-size:13px;color:var(--g1);font-weight:600}
+
+/* Вкладки */
+.tabs{position:relative;display:grid;grid-template-columns:repeat(3,1fr);margin:24px 0 16px;padding:4px;border-radius:16px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px)}
+.tabs button{position:relative;z-index:1;border:0;background:none;color:var(--g2);font:600 13.5px Manrope,sans-serif;padding:11px 4px;cursor:pointer;transition:color .25s}
+.tabs button.on{color:#000}
+.pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:12px;
+  background:linear-gradient(180deg,#fff,#c8c8c8);box-shadow:0 4px 18px rgba(255,255,255,.18);
+  transition:transform .4s cubic-bezier(.3,1.4,.5,1)}
+
+.panel{display:none}
+.panel.on{display:block;animation:pop .45s cubic-bezier(.2,1,.3,1)}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}}
+
+/* Карточки */
+.card{position:relative;margin-bottom:12px;padding:16px;border-radius:20px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px)}
+.card h3{margin:0 0 4px;font:700 16px Manrope,sans-serif}
+.card p{margin:0;color:var(--g2);font-size:13.5px;line-height:1.5}
+.btn{position:relative;overflow:hidden;display:block;width:100%;margin-top:12px;padding:14px;border:0;border-radius:14px;
+  font:700 15px Manrope,sans-serif;cursor:pointer;transition:transform .15s}
+.btn:active{transform:scale(.96)}
+.btn.main{background:linear-gradient(180deg,#fff,#cfcfcf);color:#000}
+.btn.alt{background:linear-gradient(180deg,#fff,#cfcfcf);color:#000}
+.btn.ghost{background:linear-gradient(180deg,#fff,#cfcfcf);color:#000}
+.btn .rip{position:absolute;border-radius:50%;background:rgba(120,120,120,.5);transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(4);opacity:0}}
+.note{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.09)}
+
+/* Донатеры */
+.total{text-align:center;padding:22px 16px;overflow:hidden}
+.total::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.12) 50%,transparent 65%);transform:translateX(-100%);animation:shine 4.5s ease-in-out infinite}
+@keyframes shine{60%,100%{transform:translateX(100%)}}
+.total small{display:block;color:var(--g2);font-size:13px;margin-bottom:6px}
+.total strong{font:700 38px Unbounded,sans-serif;letter-spacing:-.02em}
+.list .row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.list .row:first-child{padding-top:2px}
+.list .row:last-child{border:0;padding-bottom:2px}
+.rank{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 13px Unbounded,sans-serif;background:rgba(255,255,255,.08);color:var(--g1)}
+.r1{background:linear-gradient(135deg,#fff,#bdbdbd);color:#000}
+.r2{background:linear-gradient(135deg,#cfcfcf,#8c8c8c);color:#000}
+.r3{background:linear-gradient(135deg,#9a9a9a,#5e5e5e);color:#fff}
+.nm{flex:1;font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.am{font-weight:700;color:#fff;font-size:14px}
+.thanks{text-align:center;color:var(--g2);font-size:13px;margin:4px 0 14px}
+
+/* Помощь */
+details{border-radius:16px;background:var(--glass);border:1px solid var(--line);margin-bottom:10px;overflow:hidden}
+summary{list-style:none;cursor:pointer;padding:15px 16px;font-weight:700;font-size:14.5px;display:flex;justify-content:space-between;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:22px;color:var(--g1);transition:transform .3s}
+details[open] summary::after{transform:rotate(135deg)}
+details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.55;animation:pop .35s ease}
+
+/* Тост */
+.toast{position:fixed;left:50%;bottom:max(26px,env(safe-area-inset-bottom));z-index:9;padding:12px 20px;border-radius:30px;
+  background:rgba(18,18,18,.95);border:1px solid rgba(255,255,255,.5);color:#fff;font-weight:700;font-size:14px;
+  transform:translate(-50%,120px);opacity:0;transition:transform .45s cubic-bezier(.3,1.5,.5,1),opacity .3s;white-space:nowrap;box-shadow:0 10px 40px rgba(255,255,255,.12)}
+.toast.show{transform:translate(-50%,0);opacity:1}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="glow"><i></i><i></i></div>
+<canvas id="sparks"></canvas>
+
+<main>
+  <section class="hero">
+    <div class="brand">
+    <div class="orb">
+      <div class="pulse"></div><div class="pulse b"></div>
+      <div class="ring"></div>
+      <svg class="shield" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#7a7a7a"/></linearGradient></defs>
+        <path d="M12 2.6l7.4 2.8v6.2c0 4.4-3 7.8-7.4 9.8-4.4-2-7.4-5.4-7.4-9.8V5.4L12 2.6z" stroke="url(#sg)" stroke-width="1.5"/>
+        <path d="M8.8 15.4v-3.7a3.2 3.2 0 0 1 6.4 0v3.7" stroke="url(#sg)" stroke-width="2"/>
+      </svg>
+      <div class="orbit o1"><b></b></div>
+      <div class="orbit o2"><b></b></div>
+      <div class="orbit o3"><b></b></div>
+    </div>
+    <h1>Haven VPN</h1>
+    </div>
+    <p>Твой бесплатный проводник в свободный интернет. Обходы белых списков и многое другое.</p>
+    <div class="hello" id="hello"></div>
+  </section>
+
+  <nav class="tabs">
+    <div class="pill" id="pill"></div>
+    <button class="on" data-tab="subs">Подписки</button>
+    <button data-tab="donors">Донатеры</button>
+    <button data-tab="help">Помощь</button>
+  </nav>
+
+  <!-- Подписки -->
+  <section class="panel on" id="subs">
+    <div class="card">
+      <h3>Авто подписка</h3>
+      <p>Подключение к серверам автоматически. Обновляется сама.</p>
+      <button class="btn main" data-copy="https://raw.githubusercontent.com/s0ulcoil/HavenVPN/refs/heads/main/HavenAuto">Скопировать ссылку</button>
+    </div>
+    <div class="card">
+      <h3>Ручная ссылка</h3>
+      <p>Подключение к серверам вручную.</p>
+      <button class="btn alt" data-copy="https://raw.githubusercontent.com/s0ulcoil/HavenVPN/refs/heads/main/Haven">Скопировать ссылку</button>
+    </div>
+    <div class="card note">
+      <h3>Рекомендуем INCY</h3>
+      <p>Для авто подписки используйте приложение INCY. В целом оно лучше всего подходит для наших подписок.</p>
+    </div>
+  </section>
+
+  <!-- Донатеры -->
+  <section class="panel" id="donors">
+    <div class="card total">
+      <small>Всего собрано</small>
+      <strong id="total">0 ₽</strong>
+    </div>
+    <div class="thanks">Спасибо всем, кто поддерживает проект!</div>
+    <div class="card list" id="donorList"></div>
+    <button class="btn main" data-link="https://pay.cloudtips.ru/p/5d840674">Поддержать проект</button>
+  </section>
+
+  <!-- Помощь -->
+  <section class="panel" id="help">
+    <details><summary>Как подключиться?</summary><div>Нажми «Скопировать ссылку» во вкладке «Подписки», открой приложение INCY и вставь ссылку как новую подписку. После обновления выбери сервер и подключись.</div></details>
+    <details><summary>Чем отличаются ссылки?</summary><div>Авто подписка подключает к серверам автоматически и обновляется сама. Ручная ссылка нужна, если хочешь выбирать серверы вручную.</div></details>
+    <details><summary>Не работает подключение</summary><div>Обнови подписку в приложении и выбери другой сервер. Новости и объявления мы публикуем в канале.</div></details>
+    <button class="btn ghost" data-tg="https://t.me/hiddenwikipedia">Открыть наш канал</button>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); try{ tg.setHeaderColor("#080808"); tg.setBackgroundColor("#080808"); }catch(e){} }
+const buzz = t => { try{ tg?.HapticFeedback?.impactOccurred(t||"light"); }catch(e){} };
+
+// Приветствие по имени
+const u = tg?.initDataUnsafe?.user;
+if (u?.first_name) document.getElementById("hello").textContent = "Привет, " + u.first_name;
+
+// Список донатеров (порядок не важен, сортируется по сумме)
+const DONORS = [
+  { name: "labi-le", amount: 500 },
+  { name: "de hoh", amount: 50 },
+  { name: "Светлана", amount: 200 },
+  { name: "de hoh", amount: 149 },
+  { name: "Dagnew", amount: 100 },
+];
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => n.toLocaleString("ru-RU") + " ₽";
+// Донаты одного человека суммируются (имя без учёта регистра и лишних пробелов)
+const merged = {};
+for (const d of DONORS) {
+  const key = d.name.trim().toLowerCase();
+  if (merged[key]) merged[key].amount += d.amount;
+  else merged[key] = { name: d.name.trim(), amount: d.amount };
+}
+const sorted = Object.values(merged).sort((a,b) => b.amount - a.amount);
+const sum = DONORS.reduce((s,d) => s + d.amount, 0);
+document.getElementById("donorList").innerHTML = sorted.map((d,i) => `
+  <div class="row">
+    <div class="rank ${i<3?'r'+(i+1):''}">${i+1}</div>
+    <div class="nm">${esc(d.name)}</div>
+    <div class="am">${fmt(d.amount)}</div>
+  </div>`).join("");
+
+// Счётчик общей суммы
+function countUp(){
+  const el = document.getElementById("total"), t0 = performance.now(), dur = 1100;
+  (function step(t){
+    const p = Math.min((t - t0)/dur, 1), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = fmt(Math.round(sum * e));
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+// Вкладки
+const tabs = [...document.querySelectorAll(".tabs button")];
+const pill = document.getElementById("pill");
+function openTab(id){
+  const i = tabs.findIndex(b => b.dataset.tab === id);
+  tabs.forEach(b => b.classList.toggle("on", b.dataset.tab === id));
+  pill.style.transform = `translateX(${i*100}%)`;
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id === id));
+  if (id === "donors") countUp();
+  buzz("light");
+}
+tabs.forEach(b => b.onclick = () => openTab(b.dataset.tab));
+
+// Тост
+let tt;
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+// Копирование, ссылки, волна на кнопках
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); }
+  catch(e){
+    const a = document.createElement("textarea"); a.value = text; document.body.appendChild(a); a.select();
+    document.execCommand("copy"); a.remove();
+  }
+}
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".btn");
+  if (!btn) return;
+  const r = btn.getBoundingClientRect(), s = Math.max(r.width, r.height);
+  const rip = document.createElement("span");
+  rip.className = "rip";
+  rip.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s/2}px;top:${e.clientY - r.top - s/2}px`;
+  btn.appendChild(rip); setTimeout(() => rip.remove(), 650);
+
+  if (btn.dataset.copy) { copyText(btn.dataset.copy).then(() => { toast("Ссылка скопирована"); buzz("medium"); }); }
+  else if (btn.dataset.link) { tg ? tg.openLink(btn.dataset.link) : window.open(btn.dataset.link, "_blank"); }
+  else if (btn.dataset.tg) { tg ? tg.openTelegramLink(btn.dataset.tg) : window.open(btn.dataset.tg, "_blank"); }
+});
+
+// Плавающие частицы
+(function(){
+  const c = document.getElementById("sparks"), x = c.getContext("2d");
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  let w, h, dots;
+  const colors = ["#ffffff","#bdbdbd","#8a8a8a"];
+  function init(){
+    w = c.width = innerWidth; h = c.height = innerHeight;
+    dots = Array.from({length: Math.min(44, Math.floor(w*h/16000))}, () => ({
+      x: Math.random()*w, y: Math.random()*h, r: Math.random()*1.7+.4,
+      v: Math.random()*.35+.1, p: Math.random()*6.28, c: colors[Math.random()*3|0]
+    }));
+  }
+  function tick(t){
+    x.clearRect(0,0,w,h);
+    for (const d of dots){
+      d.y -= d.v; if (d.y < -4) { d.y = h+4; d.x = Math.random()*w; }
+      x.globalAlpha = .2 + .4*Math.abs(Math.sin(t/1200 + d.p));
+      x.fillStyle = d.c; x.beginPath(); x.arc(d.x + Math.sin(t/2000 + d.p)*8, d.y, d.r, 0, 6.28); x.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  addEventListener("resize", init); init(); requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
