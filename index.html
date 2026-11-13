@@ -14,7 +14,7 @@
   --glass:rgba(255,255,255,.055); --line:rgba(255,255,255,.12);
   --accent:#ffffff; --accent2:#c8c8c8;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent; user-select: none;}
 html,body{margin:0;background:var(--bg);color:var(--white);font-family:Manrope,system-ui,sans-serif;min-height:100%;transition:background .35s}
 body{padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom));overflow-x:hidden}
 
@@ -59,7 +59,7 @@ h1{font-family:Unbounded,sans-serif;font-weight:700;font-size:26px;margin:0;lett
 .hero p{margin:30px auto 0;max-width:300px;color:var(--g2);font-size:14.5px;line-height:1.5}
 .hello{margin:10px 0 0;font-size:13px;color:var(--g1);font-weight:600}
 
-/* Вкладки — 4 колонки (добавлена Игра) */
+/* Вкладки */
 .tabs{position:relative;display:grid;grid-template-columns:repeat(4,1fr);margin:24px 0 16px;padding:4px;border-radius:16px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px)}
 .tabs button{position:relative;z-index:1;border:0;background:none;color:var(--g2);font:600 12.5px Manrope,sans-serif;padding:11px 2px;cursor:pointer;transition:color .25s}
 .tabs button.on{color:#000}
@@ -136,8 +136,8 @@ h1{font-family:Unbounded,sans-serif;font-weight:700;font-size:26px;margin:0;lett
 .toggle-btn.active{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)}
 .toggle-btn svg{width:16px;height:16px;fill:currentColor}
 
-.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.score-box{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:8px 16px;text-align:center;flex:1;margin:0 4px}
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; gap: 8px;}
+.score-box{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:8px 16px;text-align:center;flex:1;}
 .score-box small{display:block;color:var(--g2);font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
 .score-box b{font:700 20px Unbounded,sans-serif}
 
@@ -158,6 +158,71 @@ h1{font-family:Unbounded,sans-serif;font-weight:700;font-size:26px;margin:0;lett
 .tile[data-val="512"]{background:#c084fc;color:#fff}
 .tile[data-val="1024"]{background:#60a5fa;color:#fff}
 .tile[data-val="2048"]{background:#4ade80;color:#fff;box-shadow:0 0 20px #4ade80}
+
+/* Block Blast */
+.controls-help{font-size:11px; color:var(--g2); text-align:center; margin-bottom:10px; line-height:1.4; background:rgba(255,255,255,0.03); padding:8px; border-radius:8px; border:1px solid var(--line);}
+.controls-help b{color:var(--g1);}
+
+.blast-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+#blast-grid { 
+  display: grid; 
+  grid-template-columns: repeat(8, 1fr); 
+  grid-template-rows: repeat(8, 1fr); 
+  gap: 2px; 
+  width: 100%; 
+  aspect-ratio: 1; 
+  background: rgba(255,255,255,.03); 
+  border: 1px solid var(--line); 
+  border-radius: 12px; 
+  padding: 4px; 
+}
+.blast-cell { 
+  background: rgba(255,255,255,.08); 
+  border-radius: 4px; 
+  transition: background 0.1s; 
+}
+.blast-cell.filled { 
+  background: var(--accent); 
+  box-shadow: inset 0 0 4px rgba(0,0,0,.3); 
+}
+.blast-pieces { 
+  display: flex; 
+  justify-content: space-around; 
+  align-items: center; 
+  min-height: 80px; 
+  background: var(--glass); 
+  border: 1px solid var(--line); 
+  border-radius: 12px; 
+  padding: 8px; 
+}
+.blast-piece { 
+  display: grid; 
+  gap: 2px; 
+  cursor: grab;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  touch-action: none;
+}
+.blast-piece:active { cursor: grabbing; }
+.blast-block { 
+  width: 16px; 
+  height: 16px; 
+  border-radius: 3px; 
+  background: var(--accent); 
+  box-shadow: inset 0 0 3px rgba(0,0,0,.2); 
+}
+.blast-block.empty { background: transparent; box-shadow: none; }
+
+/* Анимация ломания */
+.blast-cell.breaking {
+  animation: blast-break 0.4s ease-out forwards;
+  z-index: 10;
+}
+@keyframes blast-break {
+  0% { transform: scale(1); background: var(--accent); }
+  50% { transform: scale(1.3); background: #fff; box-shadow: 0 0 15px #fff; }
+  100% { transform: scale(0); opacity: 0; }
+}
 
 /* Помощь */
 details{border-radius:16px;background:var(--glass);border:1px solid var(--line);margin-bottom:10px;overflow:hidden}
@@ -180,7 +245,6 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
 <canvas id="sparks"></canvas>
 
 <main>
-  <!-- Верхняя панель с кнопкой профиля -->
   <div class="top-bar">
     <button class="avatar-btn" id="openProfile">?</button>
   </div>
@@ -205,17 +269,15 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
     <div class="hello" id="hello"></div>
   </section>
 
-  <!-- Экран проверки -->
-  <div id="gate" class="card gate">
+  <div id="gate" class="card gate" style="display: none;">
     <h3 id="gateTitle">Проверяем подписку</h3>
     <p id="gateText">Секунду...</p>
-    <button class="btn main" id="gateSub" data-tg="https://t.me/hiddenwikipedia" hidden>Подписаться на канал</button>
-    <button class="btn main" id="gateCheck" hidden>Я подписался</button>
-    <button class="btn main" id="gateBot" hidden>Открыть бота</button>
+    <button class="btn main" id="gateSub" data-tg="https://t.me/hiddenwikipedia" style="display: none;">Подписаться на канал</button>
+    <button class="btn main" id="gateCheck" style="display: none;">Я подписался</button>
+    <button class="btn main" id="gateBot" style="display: none;">Открыть бота</button>
   </div>
 
-  <!-- Само приложение -->
-  <div id="app" hidden>
+  <div id="app">
   <nav class="tabs">
     <div class="pill" id="pill"></div>
     <button class="on" data-tab="subs">Подписки</button>
@@ -224,7 +286,6 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
     <button data-tab="help">Помощь</button>
   </nav>
 
-  <!-- Подписки -->
   <section class="panel on" id="subs">
     <div class="card">
       <h3>Авто подписка</h3>
@@ -242,7 +303,6 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
     </div>
   </section>
 
-  <!-- Донатеры -->
   <section class="panel" id="donors">
     <div class="card total">
       <small>Всего собрано</small>
@@ -253,31 +313,56 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
     <button class="btn main" data-link="https://pay.cloudtips.ru/p/5d840674">Поддержать проект</button>
   </section>
 
-  <!-- Игра 2048 -->
   <section class="panel" id="game">
-    <div class="game-settings">
-      <button class="toggle-btn active" id="togVibe">
-        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-        Вибрация
-      </button>
-      <button class="toggle-btn" id="resetGame" style="flex: 0.6;">
-        <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-      </button>
+    <div class="game-settings" style="margin-bottom: 16px;">
+      <button class="toggle-btn active" id="btn2048" style="padding:12px;">2048</button>
+      <button class="toggle-btn" id="btnBlast" style="padding:12px;">Block Blast</button>
     </div>
 
-    <div class="game-header">
-      <div class="score-box"><small>Счет</small><b id="score">0</b></div>
-      <div class="score-box"><small>Рекорд</small><b id="best">0</b></div>
+    <!-- 2048 -->
+    <div id="g2048" style="display:block;">
+      <div class="controls-help">
+        <b>ПК:</b> Используй стрелки на клавиатуре.<br>
+        <b>Телефон:</b> Свайпай по полю в нужную сторону.
+      </div>
+      <div class="game-settings">
+        <button class="toggle-btn active" id="togVibe">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          Вибрация
+        </button>
+        <button class="toggle-btn" id="resetGame" style="flex: 0.6;">
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        </button>
+      </div>
+      <div class="game-header">
+        <div class="score-box"><small>Счет</small><b id="score">0</b></div>
+        <div class="score-box"><small>Рекорд</small><b id="best">0</b></div>
+      </div>
+      <div class="grid-container" id="grid">
+        <div class="grid-bg" id="gridBg"></div>
+        <div class="grid-tiles" id="gridTiles"></div>
+      </div>
     </div>
 
-    <div class="grid-container" id="grid">
-      <div class="grid-bg" id="gridBg"></div>
-      <div class="grid-tiles" id="gridTiles"></div>
+    <!-- Block Blast -->
+    <div id="gBlast" style="display:none;">
+      <div class="controls-help">
+        <b>ПК и Телефон:</b> Зажми фигуру внизу и перетащи её на поле. Отпусти, чтобы поставить.
+      </div>
+      <div class="game-header">
+        <div class="score-box"><small>Счет</small><b id="blastScore">0</b></div>
+        <div class="score-box"><small>Рекорд</small><b id="blastBest">0</b></div>
+        <button class="toggle-btn" id="resetBlast" style="flex: 0.4; margin: 0;">
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        </button>
+      </div>
+      <div class="blast-container">
+        <div id="blast-grid"></div>
+        <div class="blast-pieces" id="blast-pieces"></div>
+      </div>
     </div>
-    <p style="text-align:center;font-size:12px;color:var(--g2);margin-bottom:16px">Свайпай, чтобы двигать плитки</p>
   </section>
 
-  <!-- Помощь -->
   <section class="panel" id="help">
     <details><summary>Как подключиться?</summary><div>Нажми «Скопировать ссылку» во вкладке «Подписки», открой приложение INCY и вставь ссылку как новую подписку. После обновления выбери сервер и подключись.</div></details>
     <details><summary>Чем отличаются ссылки?</summary><div>Авто подписка подключает к серверам автоматически и обновляется сама. Ручная ссылка нужна, если хочешь выбирать серверы вручную.</div></details>
@@ -287,20 +372,17 @@ details div{padding:0 16px 15px;color:var(--g2);font-size:13.5px;line-height:1.5
 </div>
 </main>
 
-<!-- Модальное окно профиля -->
 <div class="modal-overlay" id="profileModal">
   <div class="modal">
     <button class="modal-close" id="closeProfile">✕</button>
     <div class="modal-avatar" id="pavatar">?</div>
     <h2 class="modal-name" id="pname">Гость</h2>
     <p class="modal-user" id="puser">@username</p>
-    
     <div class="modal-info">
       <div><small>ID</small><b id="pid">—</b></div>
       <div><small>Язык</small><b id="plang">—</b></div>
       <div><small>Premium</small><b id="pprem">—</b></div>
     </div>
-
     <h3 style="margin: 0 0 12px; font-size: 14px;">Тема оформления</h3>
     <div class="themes" id="themes"></div>
   </div>
@@ -324,7 +406,6 @@ const THEMES = [
   { id: "blue",   name: "Синяя",     accent: "#60a5fa", accent2: "#2f6fd0" },
   { id: "purple", name: "Фиолетовая",accent: "#c084fc", accent2: "#7e3fd4" },
 ];
-
 const themesEl = document.getElementById("themes");
 themesEl.innerHTML = THEMES.map(t => `
   <button class="swatch" data-theme="${t.id}" title="${t.name}">
@@ -345,7 +426,6 @@ themesEl.addEventListener("click", e => {
   applyTheme(b.dataset.theme);
   buzz("medium");
 });
-
 try { applyTheme(localStorage.getItem("theme") || "white"); } catch(e){ applyTheme("white"); }
 
 // ====== ПРОФИЛЬ ======
@@ -354,29 +434,18 @@ if (u) {
   if (u.first_name) document.getElementById("hello").textContent = "Привет, " + u.first_name;
   const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ") || "Гость";
   const initial = (u.first_name?.[0] || "?").toUpperCase();
-  
   document.getElementById("pname").textContent = fullName;
   document.getElementById("puser").textContent = u.username ? "@" + u.username : "без username";
   document.getElementById("pid").textContent = u.id || "—";
   document.getElementById("plang").textContent = (u.language_code || "—").toUpperCase();
   document.getElementById("pprem").textContent = u.is_premium ? "Да" : "Нет";
-  
   document.getElementById("pavatar").textContent = initial;
   document.getElementById("openProfile").textContent = initial;
 }
-
-// Открытие/закрытие профиля
 const modal = document.getElementById("profileModal");
-document.getElementById("openProfile").addEventListener("click", () => {
-  modal.classList.add("show");
-  buzz("light");
-});
-document.getElementById("closeProfile").addEventListener("click", () => {
-  modal.classList.remove("show");
-});
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) modal.classList.remove("show");
-});
+document.getElementById("openProfile").addEventListener("click", () => { modal.classList.add("show"); buzz("light"); });
+document.getElementById("closeProfile").addEventListener("click", () => modal.classList.remove("show"));
+modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("show"); });
 
 // ====== ДОНАТЕРЫ ======
 const DONORS = [
@@ -458,38 +527,19 @@ document.addEventListener("click", e => {
   else if (btn.dataset.tg) { tg ? tg.openTelegramLink(btn.dataset.tg) : window.open(btn.dataset.tg, "_blank"); }
 });
 
-// ====== НАСТРОЙКИ ИГРЫ ======
-const togVibe = document.getElementById("togVibe");
-if(!vibeEnabled) togVibe.classList.remove("active");
-
-togVibe.addEventListener("click", () => {
-  vibeEnabled = !vibeEnabled;
-  togVibe.classList.toggle("active", vibeEnabled);
-  localStorage.setItem("vibe", vibeEnabled);
-  buzz("medium");
-});
-
-document.getElementById("resetGame").addEventListener("click", () => {
-  reset2048();
-  buzz("medium");
-});
-
 // ====== ИГРА 2048 ======
 const gridTilesEl = document.getElementById("gridTiles");
 const gridBgEl = document.getElementById("gridBg");
 const scoreEl = document.getElementById("score");
 const bestEl = document.getElementById("best");
-
 let board = [];
 let score = 0;
 let best = parseInt(localStorage.getItem("best2048") || "0");
 bestEl.textContent = best;
-
 for (let i=0; i<16; i++){
   gridBgEl.innerHTML += '<div></div>';
   gridTilesEl.innerHTML += '<div class="tile" id="t'+i+'" style="display:none"></div>';
 }
-
 function reset2048(){
   board = Array(16).fill(0);
   score = 0;
@@ -498,7 +548,6 @@ function reset2048(){
   addRandom();
   render();
 }
-
 function addRandom(){
   let empty = [];
   for(let i=0; i<16; i++) if(board[i]===0) empty.push(i);
@@ -506,7 +555,6 @@ function addRandom(){
   let rand = empty[Math.floor(Math.random() * empty.length)];
   board[rand] = Math.random() < 0.9 ? 2 : 4;
 }
-
 function render(){
   for(let i=0; i<16; i++){
     const tile = document.getElementById("t"+i);
@@ -520,14 +568,11 @@ function render(){
     }
   }
 }
-
 function move(dir){
   let moved = false;
   let oldBoard = [...board];
-  
   const get = (r, c) => board[r*4+c];
   const set = (r, c, v) => board[r*4+c] = v;
-
   if(dir === 'up') {
     for(let c=0; c<4; c++){
       let col = [get(0,c), get(1,c), get(2,c), get(3,c)];
@@ -553,9 +598,7 @@ function move(dir){
       for(let c=0; c<4; c++) set(r, 3-c, res[c]);
     }
   }
-
   for(let i=0; i<16; i++) if(oldBoard[i] !== board[i]) moved = true;
-
   if(moved){
     addRandom();
     render();
@@ -569,7 +612,6 @@ function move(dir){
     buzz("light");
   }
 }
-
 function slide(arr){
   let res = arr.filter(x => x !== 0);
   let merged = [];
@@ -586,7 +628,6 @@ function slide(arr){
   while(merged.length < 4) merged.push(0);
   return merged;
 }
-
 function isGameOver(){
   for(let i=0; i<16; i++) if(board[i] === 0) return false;
   for(let r=0; r<4; r++){
@@ -598,15 +639,12 @@ function isGameOver(){
   }
   return true;
 }
-
-// Свайпы и стрелки
 let touchStartX = 0, touchStartY = 0;
 const gridContainer = document.getElementById("grid");
 gridContainer.addEventListener("touchstart", e => {
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
 }, {passive: true});
-
 gridContainer.addEventListener("touchend", e => {
   let dx = e.changedTouches[0].clientX - touchStartX;
   let dy = e.changedTouches[0].clientY - touchStartY;
@@ -618,41 +656,303 @@ gridContainer.addEventListener("touchend", e => {
     else if(dy < -30) move('up');
   }
 }, {passive: true});
-
 document.addEventListener("keydown", e => {
-  if(!document.getElementById("game").classList.contains("on")) return;
+  if(!document.getElementById("game").classList.contains("on") || document.getElementById("g2048").style.display === "none") return;
   if(e.key === "ArrowUp") move('up');
   if(e.key === "ArrowDown") move('down');
   if(e.key === "ArrowLeft") move('left');
   if(e.key === "ArrowRight") move('right');
 });
-
 reset2048();
+
+// ====== НАСТРОЙКИ 2048 ======
+const togVibe = document.getElementById("togVibe");
+if(!vibeEnabled) togVibe.classList.remove("active");
+togVibe.addEventListener("click", () => {
+  vibeEnabled = !vibeEnabled;
+  togVibe.classList.toggle("active", vibeEnabled);
+  localStorage.setItem("vibe", vibeEnabled);
+  buzz("medium");
+});
+document.getElementById("resetGame").addEventListener("click", () => { reset2048(); buzz("medium"); });
+
+// ====== BLOCK BLAST (DRAG & DROP) ======
+const blastGridEl = document.getElementById("blast-grid");
+const blastPiecesEl = document.getElementById("blast-pieces");
+const blastScoreEl = document.getElementById("blastScore");
+const blastBestEl = document.getElementById("blastBest");
+let blastBoard = Array(64).fill(0);
+let blastScore = 0;
+let blastBest = parseInt(localStorage.getItem("bestBlast") || "0");
+blastBestEl.textContent = blastBest;
+let pieces = [];
+
+for (let i=0; i<64; i++){
+  const cell = document.createElement("div");
+  cell.className = "blast-cell";
+  cell.dataset.idx = i;
+  blastGridEl.appendChild(cell);
+}
+
+const SHAPES = [
+  [[1,1,1]],
+  [[1,1,1,1]],
+  [[1,1],[1,1]],
+  [[1,1,1],[1,0,0],[1,0,0]],
+  [[1,1],[1,0]],
+  [[1],[1],[1]],
+  [[1,1,1],[0,1,0]]
+];
+
+function generatePieces(){
+  pieces = [];
+  for(let i=0; i<3; i++){
+    const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    pieces.push({ shape: shape, used: false });
+  }
+  renderPieces();
+}
+
+function renderPieces(){
+  blastPiecesEl.innerHTML = "";
+  pieces.forEach((p, index) => {
+    if(p.used) return;
+    const pieceEl = document.createElement("div");
+    pieceEl.className = "blast-piece";
+    pieceEl.dataset.pieceIndex = index;
+    pieceEl.style.gridTemplateColumns = `repeat(${p.shape[0].length}, 1fr)`;
+    p.shape.forEach(row => {
+      row.forEach(cell => {
+        const block = document.createElement("div");
+        block.className = "blast-block " + (cell ? "" : "empty");
+        pieceEl.appendChild(block);
+      });
+    });
+    blastPiecesEl.appendChild(pieceEl);
+  });
+}
+
+function renderBlastGrid(){
+  document.querySelectorAll(".blast-cell").forEach((cell, i) => {
+    if (cell.classList.contains("breaking")) return; // Не трогаем ломающиеся
+    cell.classList.toggle("filled", blastBoard[i] === 1);
+  });
+  blastScoreEl.textContent = blastScore;
+  if (blastScore > blastBest) {
+    blastBest = blastScore;
+    blastBestEl.textContent = blastBest;
+    localStorage.setItem("bestBlast", blastBest);
+  }
+}
+
+function checkLines(){
+  let rowsToClear = [];
+  let colsToClear = [];
+  
+  for(let r=0; r<8; r++){
+    let full = true;
+    for(let c=0; c<8; c++) if(blastBoard[r*8+c] === 0) full = false;
+    if(full) rowsToClear.push(r);
+  }
+  for(let c=0; c<8; c++){
+    let full = true;
+    for(let r=0; r<8; r++) if(blastBoard[r*8+c] === 0) full = false;
+    if(full) colsToClear.push(c);
+  }
+  
+  if(rowsToClear.length > 0 || colsToClear.length > 0){
+    const cellsToClear = new Set();
+    rowsToClear.forEach(r => { for(let c=0; c<8; c++) cellsToClear.add(r*8+c); });
+    colsToClear.forEach(c => { for(let r=0; r<8; r++) cellsToClear.add(r*8+c); });
+    
+    cellsToClear.forEach(idx => {
+      const cell = blastGridEl.children[idx];
+      cell.classList.add("breaking");
+    });
+    
+    blastScore += (rowsToClear.length + colsToClear.length) * 10;
+    buzz("heavy");
+    
+    setTimeout(() => {
+      cellsToClear.forEach(idx => {
+        blastBoard[idx] = 0;
+        const cell = blastGridEl.children[idx];
+        cell.classList.remove("breaking");
+        cell.classList.remove("filled");
+      });
+      renderBlastGrid();
+    }, 400);
+  }
+}
+
+function checkGameOver(){
+  if(pieces.every(p => p.used)){
+    generatePieces();
+  }
+}
+
+// ИСПРАВЛЕННЫЙ DRAG & DROP (без смещения)
+let dragPiece = null;
+let dragOffsetX = 0, dragOffsetY = 0;
+
+blastPiecesEl.addEventListener("mousedown", startDrag);
+blastPiecesEl.addEventListener("touchstart", startDrag, {passive: false});
+
+function startDrag(e) {
+  const pieceEl = e.target.closest(".blast-piece");
+  if (!pieceEl) return;
+  
+  if (e.type === "touchstart") e.preventDefault(); 
+  
+  dragPiece = pieceEl;
+  
+  const touch = e.touches ? e.touches[0] : e;
+  const rect = pieceEl.getBoundingClientRect();
+  
+  // Считаем, за какую часть фигуры схватился пользователь
+  dragOffsetX = touch.clientX - rect.left;
+  dragOffsetY = touch.clientY - rect.top;
+  
+  dragPiece.style.opacity = "0.8";
+  dragPiece.style.zIndex = "1000";
+  dragPiece.style.position = "fixed"; // Фиксируем, чтобы не зависеть от скролла
+  dragPiece.style.left = (touch.clientX - dragOffsetX) + "px";
+  dragPiece.style.top = (touch.clientY - dragOffsetY) + "px";
+  dragPiece.style.pointerEvents = "none"; // Чтобы не мешало клику
+  
+  document.addEventListener("mousemove", onDrag);
+  document.addEventListener("touchmove", onDrag, {passive: false});
+  document.addEventListener("mouseup", endDrag);
+  document.addEventListener("touchend", endDrag);
+}
+
+function onDrag(e) {
+  if (!dragPiece) return;
+  if (e.type === "touchmove") e.preventDefault();
+  
+  const touch = e.touches ? e.touches[0] : e;
+  dragPiece.style.left = (touch.clientX - dragOffsetX) + "px";
+  dragPiece.style.top = (touch.clientY - dragOffsetY) + "px";
+}
+
+function endDrag(e) {
+  if (!dragPiece) return;
+  
+  const touch = e.changedTouches ? e.changedTouches[0] : e;
+  const rect = blastGridEl.getBoundingClientRect();
+  const cellW = rect.width / 8;
+  const cellH = rect.height / 8;
+  
+  // Считаем координаты верхней левой клетки фигуры на поле
+  const dropX = touch.clientX - dragOffsetX - rect.left;
+  const dropY = touch.clientY - dragOffsetY - rect.top;
+  
+  const col = Math.round(dropX / cellW);
+  const row = Math.round(dropY / cellH);
+  
+  const pieceIndex = parseInt(dragPiece.dataset.pieceIndex);
+  const piece = pieces[pieceIndex];
+  
+  let canPlace = false;
+  
+  if (row >= 0 && row < 8 && col >= 0 && col < 8) {
+    canPlace = true;
+    for(let r=0; r<piece.shape.length; r++){
+      for(let c=0; c<piece.shape[r].length; c++){
+        if(piece.shape[r][c]){
+          const boardR = row + r;
+          const boardC = col + c;
+          if(boardR >= 8 || boardC >= 8 || blastBoard[boardR*8 + boardC] === 1){
+            canPlace = false;
+          }
+        }
+      }
+    }
+  }
+  
+  if(canPlace){
+    for(let r=0; r<piece.shape.length; r++){
+      for(let c=0; c<piece.shape[r].length; c++){
+        if(piece.shape[r][c]){
+          blastBoard[(row+r)*8 + (col+c)] = 1;
+        }
+      }
+    }
+    pieces[pieceIndex].used = true;
+    checkLines();
+    renderPieces();
+    checkGameOver();
+  }
+  
+  // Сброс фигуры на место
+  dragPiece.style.position = "";
+  dragPiece.style.left = "";
+  dragPiece.style.top = "";
+  dragPiece.style.opacity = "1";
+  dragPiece.style.zIndex = "";
+  dragPiece.style.pointerEvents = "";
+  dragPiece = null;
+  
+  document.removeEventListener("mousemove", onDrag);
+  document.removeEventListener("touchmove", onDrag);
+  document.removeEventListener("mouseup", endDrag);
+  document.removeEventListener("touchend", endDrag);
+  
+  setTimeout(renderBlastGrid, 10);
+}
+
+document.getElementById("resetBlast").addEventListener("click", () => {
+  blastBoard.fill(0);
+  blastScore = 0;
+  generatePieces();
+  renderBlastGrid();
+  buzz("medium");
+});
+
+generatePieces();
+renderBlastGrid();
+
+// ====== ПЕРЕКЛЮЧАТЕЛЬ ИГР ======
+document.getElementById("btn2048").addEventListener("click", () => {
+  document.getElementById("btn2048").classList.add("active");
+  document.getElementById("btnBlast").classList.remove("active");
+  document.getElementById("g2048").style.display = "block";
+  document.getElementById("gBlast").style.display = "none";
+  buzz("light");
+});
+
+document.getElementById("btnBlast").addEventListener("click", () => {
+  document.getElementById("btnBlast").classList.add("active");
+  document.getElementById("btn2048").classList.remove("active");
+  document.getElementById("gBlast").style.display = "block";
+  document.getElementById("g2048").style.display = "none";
+  buzz("light");
+});
 
 // ====== ПРОВЕРКА ПОДПИСКИ ======
 const API_URL = "https://havenvpn.havenvpnsupport.workers.dev/api/check"; 
 const BOT_URL = "https://t.me/HavenVPNrobot";
-const LINKS = {};
+const LINKS = {
+  auto: "https://raw.githubusercontent.com/s0ulcoil/HavenVPN/refs/heads/main/HavenAuto",
+  manual: "https://raw.githubusercontent.com/s0ulcoil/HavenVPN/refs/heads/main/Haven"
+};
 const gate = document.getElementById("gate"), appEl = document.getElementById("app");
 const gSub = document.getElementById("gateSub"), gCheck = document.getElementById("gateCheck"), gBot = document.getElementById("gateBot");
 
 function showGate(title, text, o = {}) {
-  appEl.hidden = true; gate.hidden = false;
+  appEl.style.display = "none"; 
+  gate.style.display = "block";
   document.getElementById("gateTitle").textContent = title;
   document.getElementById("gateText").textContent = text;
-  gSub.hidden = !o.sub; 
-  gCheck.hidden = !o.check; 
-  gBot.hidden = !(o.bot && BOT_URL);
-}
-
-function unlock() {
-  gate.hidden = true; appEl.hidden = false;
-  openTab("subs");
+  gSub.style.display = o.sub ? "block" : "none"; 
+  gCheck.style.display = o.check ? "block" : "none"; 
+  gBot.style.display = (o.bot && BOT_URL) ? "block" : "none";
 }
 
 async function checkAccess(manual) {
   if (!tg?.initData) {
-    showGate("Открой через Telegram", "Приложение работает только внутри бота Haven VPN. Нажми кнопку ниже.", { bot: true });
+    gate.style.display = "none";
+    appEl.style.display = "block";
     return;
   }
 
@@ -671,7 +971,9 @@ async function checkAccess(manual) {
     if (d.ok && d.subscribed) {
       LINKS.auto = d.auto;
       LINKS.manual = d.manual;
-      unlock();
+      gate.style.display = "none";
+      appEl.style.display = "block";
+      openTab("subs");
     } else if (d.ok && !d.subscribed) {
       showGate("Нужна подписка на канал",
         manual ? "Подписка не найдена. Подпишись на канал и нажми «Я подписался»."
